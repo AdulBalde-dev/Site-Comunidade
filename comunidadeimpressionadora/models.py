@@ -57,7 +57,7 @@ class Post(database.Model):
     titulo = database.Column(database.String(50), nullable=False)
     corpo = database.Column(database.Text, nullable=False)
     # Use datetime.now(timezone.utc) para criar um datetime consciente do fuso horário UTC
-    data_criacao = database.Column(database.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    data_criacao = database.Column(database.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     # 'usuario.id' é a minha tabela de Usuario pegando o id
     id_usuario = database.Column(database.Integer,  database.ForeignKey('usuario.id'), nullable=False)
 

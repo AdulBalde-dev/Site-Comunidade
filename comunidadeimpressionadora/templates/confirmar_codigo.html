@@ -1,125 +1,39 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmação de Código</title>
-    <style>
-        /* Estilo básico e responsivo para a página */
-        body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-
-        .container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .code-inputs {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .code-inputs input {
-            font-size: 20px;
-            text-align: center;
-            width: 45px;
-            height: 45px;
-            margin: 0 5px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .code-inputs input:focus {
-            border-color: #333;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #0056b3;
-        }
-
-        @media (max-width: 400px) {
-            .code-inputs input {
-                width: 40px;
-                height: 40px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
+{% extends 'base.html' %}
+{% block title %}Confirme seu e-mail — Comunidade{% endblock %}
+{% block body %}
+<section class="container narrow-page">
+    <div class="verification-card">
+        <span class="verification-icon"><i class="bi bi-envelope-check"></i></span>
+        <span class="eyebrow">SÓ MAIS UM PASSO</span>
         <h1>Confirme seu e-mail</h1>
-        <p>Por favor, insira o código de 6 dígitos enviado ao seu e-mail.</p>
-        <form method="POST" action="">
+        <p>Digite o código de seis dígitos que enviamos para sua caixa de entrada.</p>
+        <form method="post" action="">
             {{ form.hidden_tag() }}
             <div class="code-inputs">
-                <!-- Usamos os campos do Flask-WTF aqui -->
-                {{ form.code1(class="form-control", maxlength="1", oninput="moveToNext(this, 'code2')") }}
-                {{ form.code2(class="form-control", maxlength="1", oninput="moveToNext(this, 'code3')") }}
-                {{ form.code3(class="form-control", maxlength="1", oninput="moveToNext(this, 'code4')") }}
-                {{ form.code4(class="form-control", maxlength="1", oninput="moveToNext(this, 'code5')") }}
-                {{ form.code5(class="form-control", maxlength="1", oninput="moveToNext(this, 'code6')") }}
-                {{ form.code6(class="form-control", maxlength="1") }}
+                {% for field in [form.code1, form.code2, form.code3, form.code4, form.code5, form.code6] %}
+                    {{ field(class="form-control code-field", maxlength="1", inputmode="numeric", autocomplete="one-time-code" if loop.first else "off", aria_label="Dígito " ~ loop.index) }}
+                {% endfor %}
             </div>
-            <button type="submit">Confirmar</button>
+            {% for field in [form.code1, form.code2, form.code3, form.code4, form.code5, form.code6] %}
+                {% for error in field.errors %}<div class="text-danger small mb-1">{{ error }}</div>{% endfor %}
+            {% endfor %}
+            {{ form.submit(class="btn btn-brand w-100 mt-3") }}
         </form>
+        <a class="verification-back" href="{{ url_for('login') }}">Voltar para o login</a>
     </div>
-
-    <script>
-        // Função para mover automaticamente para o próximo campo ao digitar
-        function moveToNext(current, nextFieldID) {
-            if (current.value.length === 1) {
-                document.getElementById(nextFieldID).focus();
-            }
-        }
-
-        // Função para mover para o campo anterior com backspace
-        document.querySelectorAll('.form-control').forEach((input, index, inputs) => {
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && input.value === '' && index > 0) {
-                    inputs[index - 1].focus();
-                }
-            });
-        });
-    </script>
-    
-</body>
-</html>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  const fields = [...document.querySelectorAll('.code-field')];
+  fields.forEach((field, index) => {
+    field.addEventListener('input', () => {
+      field.value = field.value.replace(/\D/g, '').slice(-1);
+      if (field.value && fields[index + 1]) fields[index + 1].focus();
+    });
+    field.addEventListener('keydown', event => {
+      if (event.key === 'Backspace' && !field.value && fields[index - 1]) fields[index - 1].focus();
+    });
+  });
+</script>
+{% endblock %}

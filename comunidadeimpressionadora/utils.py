@@ -12,7 +12,7 @@ def enviar_email_bem_vindo(usuario):
     # Cria o e-mail com o assunto e o destinatário
     msg = Message('Bem-vindo à Comunidade!', recipients=[usuario.email])
      # Gera o link com o domínio correto, substitua "meusite.com" pelo seu domínio
-    link = url_for('perfil', _external=True).replace("127.0.0.1:5000", "meusite.com")
+    link = url_for('perfil', _external=True)
 
     # Renderiza o template com o link correto
     # Renderiza o conteúdo HTML do e-mail
@@ -84,10 +84,9 @@ def confirmar_token(token, expiracao=3600):
 # Função que gera a URL de confirmação com o token
 def gerar_confirmar_url(usuario):
     token = gerar_token(usuario.email)  # Gera o token para o e-mail do usuário
-    confirmar_url = url_for('confirmar_email', token=token, _external=True, _scheme='http')  # Gera a URL de confirmação
+    confirmar_url = url_for('confirmar_email', token=token, _external=True)
     # Substituir localhost pelo IP da sua máquina
     # Você pode modificar o link que é enviado no e-mail para usar o IP local do seu computador automaticamente. Modifique a geração do link de confirmação, alterando o url_for para usar o IP da sua máquina, em vez de localhost.
-    confirmar_url = confirmar_url.replace('localhost', '192.168.220.112')  # Altere para o IP do seu computador
     return confirmar_url  # Retorna a URL gerada
 
 
@@ -96,7 +95,7 @@ def enviar_email_confirmacao(usuario):
     confirmar_url = gerar_confirmar_url(usuario)  # Gera a URL de confirmação
     codigo_confirmacao = usuario.codigo_confirmacao  # Pega o código de confirmação do usuário
     html = render_template('confirmar_email.html', confirmar_url=confirmar_url, codigo_confirmacao=codigo_confirmacao)  # Cria o corpo do e-mail
-    msg = Message('Confirme seu E-mail', sender='noreply@seusite.com', recipients=[usuario.email])  # Configura a mensagem
+    msg = Message('Confirme seu E-mail', recipients=[usuario.email])
     msg.html = html  # Adiciona o HTML ao e-mail
     # Cria uma thread para enviar o e-mail em segundo plano
     thread = threading.Thread(target=enviar_email_thread, args=(msg,))

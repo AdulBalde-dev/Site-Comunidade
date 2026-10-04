@@ -1,23 +1,13 @@
 {% extends 'base.html' %}
 
-{% block head %}
-    <style>
-        .titulo-personalizado {
-            color: #ff8800; /* Cor laranja, você pode mudar para a cor que preferir */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Sombra suave para o texto */
-            font-family: 'Arial', sans-serif; /* Alterar a fonte para algo mais moderno */
-            letter-spacing: 1px; /* Espaçamento entre as letras */
-        }
-    </style>
-
-{% endblock %}
-
-
-
 {% block body %}
 
-    <div class="container">
-        <h1 class="text-center display-6 fw-bold my-4 titulo-personalizado">Faca Login ou Crie sua Conta para Continuar</h1>
+    <div class="container auth-page">
+        <div class="auth-heading text-center">
+            <span class="eyebrow">BEM-VINDO À COMUNIDADE</span>
+            <h1 class="display-6 fw-bold my-3">Aprender junto muda tudo.</h1>
+            <p>Entre para continuar ou crie sua conta em poucos passos.</p>
+        </div>
         <hr>
         <div class="row g-3">  <!-- g-3 adiciona um espaçamento entre as colunas -->
 
@@ -98,7 +88,7 @@
             <!--Formulario de criar conta-->
             <div class="col col-12 col-md-6">
                 <!--Todo formulario precisa ter um metodo post e uma acao vazia-->
-                <form method="POST" action="" class="border p-4 mt-2" hx-boost="false"> 
+                <form method="POST" action="" class="border p-4 mt-2" hx-boost="false" id="criar-conta">
 
                     <!--Token que devemos sempre cololar embaixo da tag form para deixar o formulario mais seguro-->
                     {{ form_criarconta.csrf_token }}

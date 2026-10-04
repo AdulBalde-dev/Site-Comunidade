@@ -1,58 +1,51 @@
 {% extends 'base.html' %}
 
+{% block title %}Comunidade Impressionadora — ideias que aproximam{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1 class="text-warning mt-2">Comunidade Impressionadora - Hashtag Treinamentos</h1>
-        <h2>Alunos, experts e a galera da Hashtag em um só lugar</h2>
-        <hr>
-
-        <!--Percorrer todos os posts-->
-        {%  for post in posts %}
-
-        <div class="row border mt-2 p-3" style="background-color: #f2f5f8 !important;">
-            <div class="col col-3">
-                 <!--Imagem do usuario que apostou-->
-                <div class="image me-4">
-                    <img src="{{ url_for('static', filename='fotos_perfil/{}'.format(post.autor.foto_perfil)) }}" class="rounded" width="200" >
-                    <strong>{{ post.autor.username }}</strong>
-                    <!-- Os Cursos do usuarios-->
-                    <!-- Percorrer os cursos do cara e tranformar em uma lista usando o metodo split(;) -->
-                    <!-- current_user.cursos é os cursos do usuarios armazenados no banco de dados -->
-                    
-                    <!-- {% for curso in post.autor.cursos.split(';') %}
-                        <span class="badge text-bg-success">{{ curso }}</span>
-                    {% endfor %} -->
-
-                    <div class="dropdown">
-                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                          Cursos
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                          {% for curso in post.autor.cursos.split(';') %}
-                            <li><a class="dropdown-item" href="#">{{ curso }}</a></li>
-                          {% endfor %}
-                        </ul>
-                      </div>
-                      
-
-                </div>
-
+<section class="hero-section">
+    <div class="container hero-inner">
+        <div class="hero-copy">
+            <span class="eyebrow"><span class="eyebrow-dot"></span> UM LUGAR PARA CRESCER JUNTO</span>
+            <h1>Conhecimento fica melhor <span>quando é compartilhado.</span></h1>
+            <p>Encontre pessoas que estão aprendendo, troque experiências e transforme suas ideias em projetos.</p>
+            <div class="hero-actions">
+                {% if current_user.is_authenticated %}
+                    <a class="btn btn-brand" href="{{ url_for('criar_post') }}">Compartilhar uma ideia <i class="bi bi-arrow-right ms-2"></i></a>
+                {% else %}
+                    <a class="btn btn-brand" href="{{ url_for('login') }}#criar-conta">Faça parte da comunidade <i class="bi bi-arrow-right ms-2"></i></a>
+                {% endif %}
+                <a class="hero-secondary" href="#conversas">Explorar publicações <i class="bi bi-arrow-down-right ms-1"></i></a>
             </div>
-
-            <div class="col col-9">
-                <!-- A tag <a> é usada para criar um link. O atributo 'href' define o destino do link. -->
-                  <!-- post.id é a minha tabela de post pegando o id do post -->
-                <a style="text-decoration: none;" href="{{ url_for('exibir_post', post_id=post.id ) }}">
-                  <h3>{{ post.titulo }}</h3>
-                </a>
-
-                <p>{{ post.corpo }}</p>
-            </div>
+            <div class="hero-proof"><div class="proof-avatars"><span>A</span><span>M</span><span>J</span><span><i class="bi bi-stars"></i></span></div><span>Aprenda junto. Compartilhe sempre.</span></div>
         </div>
-
-        {% endfor %}
+        <div class="hero-art" aria-hidden="true">
+            <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+            <div class="art-spark spark-one">✳</div><div class="art-spark spark-two">✦</div>
+            <div class="art-card art-card-back"><span class="art-card-icon"><i class="bi bi-lightbulb"></i></span><span>Uma ideia pode<br>mudar tudo.</span></div>
+            <div class="art-card art-card-front"><div class="art-card-top"><span class="art-live-dot"></span> CONVERSA DA COMUNIDADE</div><p>Qual habilidade você está aprendendo esta semana?</p><div class="art-replies"><span class="mini-avatar avatar-a">A</span><span class="mini-avatar avatar-b">M</span><span class="mini-avatar avatar-c">J</span><span>+ pessoas participando</span></div></div>
+            <div class="art-sticker"><i class="bi bi-heart-fill"></i> aprender<br>em comunidade</div>
+        </div>
     </div>
+</section>
+
+<section class="community-section" id="conversas">
+    <div class="container">
+        <div class="section-heading">
+            <div><span class="eyebrow">IDEIAS EM MOVIMENTO</span><h2>O que está acontecendo</h2><p>Inspiração, dúvidas e conquistas compartilhadas por aqui.</p></div>
+            {% if current_user.is_authenticated %}<a class="section-link" href="{{ url_for('criar_post') }}">Escrever publicação <i class="bi bi-arrow-up-right"></i></a>{% endif %}
+        </div>
+        <div class="post-grid">
+            {% for post in posts %}
+            <article class="post-card">
+                <div class="post-card-meta"><a class="post-author" href="{{ url_for('exibir_post', post_id=post.id) }}"><img src="{{ url_for('static', filename='fotos_perfil/' ~ post.autor.foto_perfil) }}" alt="Foto de {{ post.autor.username }}"><span>{{ post.autor.username }}</span></a><time datetime="{{ post.data_criacao.strftime('%Y-%m-%d') }}">{{ post.data_criacao.strftime('%d/%m/%Y') }}</time></div>
+                <a class="post-card-content" href="{{ url_for('exibir_post', post_id=post.id) }}"><h3>{{ post.titulo }}</h3><p>{{ post.corpo|truncate(190) }}</p></a>
+                <a class="post-read" href="{{ url_for('exibir_post', post_id=post.id) }}">Continuar lendo <i class="bi bi-arrow-up-right"></i></a>
+            </article>
+            {% else %}
+            <div class="empty-community"><span class="empty-icon"><i class="bi bi-chat-heart"></i></span><h3>A primeira conversa começa com você.</h3><p>Compartilhe uma ideia, uma dúvida ou algo que aprendeu recentemente.</p>{% if current_user.is_authenticated %}<a class="btn btn-brand" href="{{ url_for('criar_post') }}">Criar primeira publicação</a>{% else %}<a class="btn btn-brand" href="{{ url_for('login') }}#criar-conta">Entrar na comunidade</a>{% endif %}</div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 {% endblock %}
-
-

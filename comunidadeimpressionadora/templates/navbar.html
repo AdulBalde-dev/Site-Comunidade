@@ -1,57 +1,34 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid container">
-        <a hx-boost="false" class="navbar-brand" href="{{ url_for('home') }}">Comunidade Impressionadora</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar navbar-expand-lg site-nav">
+    <div class="container">
+        <a class="navbar-brand brand-lockup" href="{{ url_for('home') }}" aria-label="Comunidade Impressionadora, início">
+            <span class="brand-mark"><i class="bi bi-stars"></i></span>
+            <span>comunidade<span class="brand-accent">.</span></span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav" aria-controls="siteNav" aria-expanded="false" aria-label="Abrir navegação">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <!--Primeiros links de bara de navegacao-->
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a hx-boost="false" class="nav-link active" aria-current="page" href="{{ url_for('home') }}"><i class="bi bi-house-fill"></i> Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('usuarios') }}"><i class="bi bi-people-fill"></i> Usuarios</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('contato') }}"><i class="bi bi-telephone-fill"></i> Contato</a>
-                </li>
-                <!-- Settings -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('configuracoes') }}">
-                        <i class="bi bi-gear me-1"></i>
-                        Configurações
-                    </a>
-                    
-                </li>
-                
+        <div class="collapse navbar-collapse" id="siteNav">
+            <ul class="navbar-nav mx-auto nav-main">
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('home') }}">Início</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('usuarios') }}">Pessoas</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('contato') }}">Contato</a></li>
             </ul>
-            
-            <!--Links na barra de navegacao de login e de criar conta-->
-            <ul class="navbar-nav d-flex justify-content-center">
-                <!--Isso ai so vai aparecer se o usuario estiver autenticado-->
+            <div class="nav-actions">
                 {% if current_user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('criar_post') }}"><i class="bi bi-pencil-square"></i> Criar Post</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('perfil') }}"><i class="bi bi-person-circle"></i> Meu Perfil</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a hx-boost="false" class="nav-link active" aria-current="page" href="{{ url_for('sair') }}"><i class="bi bi-box-arrow-left"></i> Sair</a>
-                    </li>
-                <!--Isso ai so vai aparecer se o usuario nao estiver autenticado-->
+                    <a class="nav-profile" href="{{ url_for('perfil') }}">
+                        <img src="{{ url_for('static', filename='fotos_perfil/' ~ current_user.foto_perfil) }}" alt="" class="nav-avatar">
+                        <span>Meu perfil</span>
+                    </a>
+                    <a class="btn btn-brand btn-sm" href="{{ url_for('criar_post') }}"><i class="bi bi-plus-lg me-1"></i>Publicar</a>
+                    <form method="post" action="{{ url_for('sair') }}" class="m-0">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-link nav-logout" type="submit" aria-label="Sair"><i class="bi bi-box-arrow-right"></i></button>
+                    </form>
                 {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="{{ url_for('login') }}"><i class="bi bi-person-plus-fill"></i> Criar Conta</a>
-                    </li>
+                    <a class="nav-link nav-login" href="{{ url_for('login') }}">Entrar</a>
+                    <a class="btn btn-brand btn-sm" href="{{ url_for('login') }}#criar-conta">Criar conta <i class="bi bi-arrow-up-right ms-1"></i></a>
                 {% endif %}
-            </ul>
+            </div>
         </div>
     </div>
 </nav>

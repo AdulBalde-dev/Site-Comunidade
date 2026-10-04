@@ -1,70 +1,22 @@
 {% extends 'base.html' %}
-
-    <div class="container"></div>
-        <h1>Usuarios</h1>
-    </div>
-    <hr>
-
+{% block title %}Pessoas — Comunidade Impressionadora{% endblock %}
 {% block body %}
-
-    {% for usuario in meus_usuarios %}
-        <div class="container mt-5 d-flex justify-content-center">
-            <div class="card p-3">
-                <div class="d-flex align-items-center">
-        
-                    <!--Imagem do usuario-->
-                    <div class="image me-4">
-                        <img src="{{ url_for('static', filename='fotos_perfil/{}'.format(usuario.foto_perfil)) }}" class="rounded" width="200" >
-                    </div>
-        
-                    <!--Nome do usuario e o email do usuario-->
-                    <div class="ml-3 w-100">
-
-                        <!-- Nome do usuario que ta logado-->
-                        <h4 class="mb-0 mt-0">{{ usuario.username }}</h4>
-                        <!--O email do usuario que ta logado-->
-                        <span>{{ usuario.email }}</span>
-        
-                        <!--Os cursos e os postes-->
-                        <div class="p-2 mt-2 bg-primary d-flex justify-content-between rounded text-white stats">
-                            <!--Verifica se tem o texto 'Nao Informado' nos cursos do cara-->
-                            {% if 'Nao Informado' in usuario.cursos %}
-                                <div class="d-flex flex-column">
-                                    <span class="articles">Cursos</span>
-                                    <!--Contar quantidade de ponto e virgulars, que vem depois de cada curso e somar um-->
-                                    <span class="number1">0</span>
-                                </div>
-                            {% else %}
-                                <div class="d-flex flex-column">
-                                    <span class="articles">Cursos</span>
-                                    <!--Contar quantidade de ponto e virgulars, que vem depois de cada curso e somar um-->
-                                    <span class="number1">{{ usuario.cursos.count(';') + 1 }}</span>
-                                </div>
-                            {% endif %}
-        
-                            <div class="d-flex flex-column">
-                                <span class="rating">Posts</span>
-                                <span class="number3">{{ usuario.contar_posts() }}</span>
-                            </div>
-                        </div>
-        
-                    </div>
-        
-                </div>
+<section class="container people-page">
+    <div class="section-heading">
+        <div><span class="eyebrow">GENTE QUE FAZ ACONTECER</span><h1>Conheça a comunidade</h1><p>Aprendizado compartilhado começa com boas conexões.</p></div>
+    </div>
+    <div class="people-grid">
+        {% for usuario in meus_usuarios %}
+        <article class="person-card">
+            <img src="{{ url_for('static', filename='fotos_perfil/' ~ usuario.foto_perfil) }}" alt="Foto de {{ usuario.username }}" class="person-avatar">
+            <div class="person-details"><h2>{{ usuario.username }}</h2><p>Membro da comunidade</p>
+                <div class="person-stats"><span><strong>{{ usuario.contar_posts() }}</strong> publicações</span><span><strong>{{ usuario.cursos.split(';')|select|list|length if usuario.cursos != 'Nao Informado' else 0 }}</strong> cursos</span></div>
+                {% if usuario.cursos != 'Nao Informado' %}<div class="person-courses">{% for curso in usuario.cursos.split(';') %}<span>{{ curso }}</span>{% endfor %}</div>{% endif %}
             </div>
-        </div>
-    
-        <div class="row d-flex justify-content-center">
-            <div class="col col-4 text-center">
-                <div><strong>Cursos</strong></div>
-                <!-- Percorrer os cursos do cara e tranformar em uma lista usando o metodo split(;) -->
-                <!-- usuario.cursos é os cursos do usuarios armazenados no banco de dados -->
-                {% for curso in usuario.cursos.split(';') %}
-                    <button type="button" class="btn btn-success mt-2" disabled>{{ curso }}</button>
-                {% endfor %}
-            </div>
-        </div>
-    {% endfor %}
-    <div class="row mt-5"></div>
-
+        </article>
+        {% else %}
+        <div class="empty-community"><span class="empty-icon"><i class="bi bi-people"></i></span><h3>Você pode ser a primeira pessoa por aqui.</h3><p>Convide alguém para aprender e compartilhar junto.</p></div>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}

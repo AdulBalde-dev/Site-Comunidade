@@ -9,6 +9,7 @@ from functools import wraps
 from PIL import Image
 from comunidadeimpressionadora.forgotpassword import gerar_token, validar_token, enviar_email
 from datetime import datetime, timezone
+from urllib.parse import urljoin, urlparse
 from comunidadeimpressionadora.utils import enviar_email_bem_vindo, enviar_email_alteracao_senha, enviar_email_exclusao_conta, enviar_email_confirmacao_redefinicao_senha, enviar_email_confirmacao, confirmar_token, gerar_codigo_confirmacao
 
 # from flask_babel import gettext
@@ -37,10 +38,6 @@ def contato():
 
             database.session.add(contato)
             database.session.commit()
-            print(request.form)
-            print(request.method)
-            print(request.full_path)
-            print(request.args)
             flash('Sua mensagem foi enviada com sucesso!', 'alert-success')
         elif request.method == 'GET' and current_user.is_authenticated:
            contatoform.nome.data = current_user.username
@@ -48,7 +45,6 @@ def contato():
 
         # Configuração do email
         # meu_email = "alaiseide2006@gmail.com"  # Substitua pelo seu email
-        # minha_senha = "Flashrevers20102010.."  # Substitua pela sua senha
 
         # # Criar a mensagem
         # msg = MIMEMultipart()
@@ -95,7 +91,7 @@ def login():
     # instanciando o meu formulario de criar_conta a minha classe FormCriarConta()
     form_criarconta = FormCriarConta()
     # Verifica se o usuario fez login com sucesso
-    if form_login.validate_on_submit() and 'botao_submit_login' in request.form:
+    if 'botao_submit_login' in request.form and form_login.validate_on_submit():
         # Então, resumindo, essa linha de código está procurando no banco de dados pelo usuário que possui o email fornecido no formulário de login e armazenando esse usuário na variável usuario.
         usuario = Usuario.query.filter_by(email = form_login.email.data).first()
         #print(usuario.senha)
@@ -113,7 +109,8 @@ def login():
                 # Obtém o parâmetro 'next' da query string da URL, que é geralmente usado para redirecionar o usuário após o login.
                 parametro_next = request.args.get('next')
                 # Verifica se o parâmetro 'next' foi fornecido na query string.
-                if parametro_next:
+                destino = urlparse(urljoin(request.host_url, parametro_next or ""))
+                if parametro_next and destino.scheme in {"http", "https"} and destino.netloc == request.host:
                     # Se o parâmetro 'next' estiver presente, redireciona o usuário para o URL fornecido pelo parâmetro 'next'.
                     return redirect(parametro_next)
                 else:
@@ -130,12 +127,12 @@ def login():
         request.form é um dicionário que contém todos os campos do formulário. A chave é o nome do campo e o valor é o valor do campo. Então, 'botao_submit_criarconta' in request.form verifica se a chave 'botao_submit_criarconta' está presente no dicionário request.form, o que significaria que o botão de submit do formulário de criação de conta foi pressionado."""
    
     # Verifica se o usuario criou conta com sucesso
-    if form_criarconta.validate_on_submit() and 'botao_submit_criarconta' in request.form:
+    if 'botao_submit_criarconta' in request.form and form_criarconta.validate_on_submit():
         # Gera o código de confirmação
         codigo_confirmacao = gerar_codigo_confirmacao()  # Gera o código de 6 dígitos
         # print(request.form)
         # criptografar a senha
-        senha_cript = bcrypt.generate_password_hash(form_criarconta.senha.data)
+        senha_cript = bcrypt.generate_password_hash(form_criarconta.senha.data).decode('utf-8')
         #print(senha_cript)
         # Criar o usuario
         # adicionar na sessao
@@ -217,7 +214,7 @@ def unconfirmed():
     return render_template('unconfirmed.html')  # Renderiza a página de confirmação pendente
 
 # pagina de sair
-@app.route('/sair')
+@app.route('/sair', methods=['POST'])
 @login_required
 def sair():
     # sair e redirecionar para a pagina home
@@ -256,9 +253,8 @@ def salvar_imagem(imagem):
     # adicionar um codigo aleatorio no nome da imagem
     codigo = secrets.token_hex(8)
     # separar o nome do arquivo com a extensao
-    nome, extensao = os.path.splitext(imagem.filename)
-    # juntar nome, codigo e a extensao
-    nome_arquivo = nome + codigo + extensao
+    _, extensao = os.path.splitext(imagem.filename)
+    nome_arquivo = codigo + extensao.lower()
     # salvar a imagem na pasta fotos_perfil
     #  o app.root_path seria o caminho do novo app que é comunidadeimpressionadora
     caminho_completo = os.path.join(app.root_path, 'static/fotos_perfil', nome_arquivo)
@@ -266,6 +262,7 @@ def salvar_imagem(imagem):
     # 200x200 px
     tamanho = (200, 200)
     imagem_reduzida = Image.open(imagem)
+    imagem_reduzida = imagem_reduzida.convert('RGB')
     imagem_reduzida.thumbnail(tamanho)
     # salvar a imagem na pasta fotos_perfil
     imagem_reduzida.save(caminho_completo)
@@ -343,7 +340,7 @@ def exibir_post(post_id):
     # 'Post' é presumivelmente uma classe que representa uma postagem no seu banco de dados.
     # 'query' é um objeto que permite fazer consultas ao banco de dados.
     # 'get(post_id)' está buscando o post com o id especificado.
-    post = Post.query.get(post_id)
+    post = Post.query.get_or_404(post_id)
 
     # Aqui, estamos verificando se o usuário atual é o autor do post.
     # Se for, criamos um novo formulário de edição de post.
@@ -373,7 +370,7 @@ def exibir_post(post_id):
 
 
 # Esta linha define a rota para excluir um post. Ela aceita tanto métodos GET quanto POST.
-@app.route('/post/<int:post_id>/excluir', methods=['GET', 'POST'])
+@app.route('/post/<int:post_id>/excluir', methods=['POST'])
 # O decorador @login_required garante que o usuário deve estar logado para acessar esta rota.
 @login_required
 # Esta é a função que será chamada quando a rota acima for acessada.
@@ -381,7 +378,7 @@ def excluir_post(post_id):
 
 
     # Aqui, estamos buscando o post com o id especificado do banco de dados.
-    post = Post.query.get(post_id)
+    post = Post.query.get_or_404(post_id)
 
     # Verificamos se o usuário atual é o autor do post.
     if current_user == post.autor:
@@ -539,7 +536,7 @@ def alterar_senha():
         # codifica a senha que o usuario digitou no formulario
         nova_senha_hash = bcrypt.generate_password_hash(form.nova_senha.data).decode('utf-8')
         # muda a senha o usuario
-        current_user.senha_hash = nova_senha_hash
+        current_user.senha = nova_senha_hash
         database.session.commit()
         # Envia o e-mail de notificação de alteração de senha
         enviar_email_alteracao_senha(current_user)

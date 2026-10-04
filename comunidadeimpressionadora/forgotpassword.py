@@ -27,7 +27,6 @@ def gerar_token(usuario):
     # Valor (usuario.id): Isso é o que você quer guardar dentro da caixa.
     # Cria um token seguro usando o serializador com o ID do usuário
     token_str = serializer.dumps({'usuario_id': usuario.id})
-    print(token_str)
     
     # Calcula a data de expiração (1 hora a partir de agora)
     data_expiracao = datetime.now(timezone.utc) + timedelta(hours=1)
@@ -59,7 +58,6 @@ def validar_token(token_str):
     try:
         # Decodifica o token para obter os dados (ID do usuário)
         dados = serializer.loads(token_str, max_age=3600)  # 3600 segundos = 1 hora
-        print(dados)
         # pega o id do usuario
         usuario_id = dados.get('usuario_id')
         
@@ -80,9 +78,8 @@ def validar_token(token_str):
                 return None  # Token expirado
         else:
             return None  # Token não encontrado
-    except Exception as e:
+    except Exception:
         # Em caso de erro (token inválido ou expirado), retorna None
-        print(f'Erro ao validar token: {e}')
         return None
 
 # def enviar_email(email, token):
@@ -106,9 +103,7 @@ def enviar_email(email, assunto, template, **kwargs):
     :param template: Nome do template HTML para o email
     :param kwargs: Argumentos adicionais para renderizar o template
     """
-    msg = Message(assunto, 
-                    sender='noreply@comunidadeimpressionadora.com',
-                    recipients=[email])
+    msg = Message(assunto, recipients=[email])
     msg.html = render_template(template + '.html', **kwargs)
 
     # Cria uma thread para enviar o e-mail em segundo plano

@@ -3,7 +3,6 @@ from comunidadeimpressionadora.models import Usuario, Post, Contato, TokenRedefi
 
 
 with app.app_context():
-    database.drop_all()
     database.create_all()
 
 ################################
